@@ -1,6 +1,6 @@
 #!/bin/bash
 # Smoke test for tip.sh: the guarantees the skills rely on, on an isolated state.
-# Runs on the system bash and awk of Linux (mawk/gawk) and macOS (bash 3.2, BWK awk).
+# Runs on the system bash and awk of Linux (gawk, mawk) and macOS (bash 3.2, BWK awk).
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SKILL="$ROOT/plugins/hintdeck/skills/tip"

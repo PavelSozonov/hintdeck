@@ -34,7 +34,7 @@ code: `git worktree add ../hintdeck-dev -b <branch> origin/main`.
 | Catalog: unique ids and numbers, translations in sync (`tip.sh lint --strict`) | pre-commit | `lint` |
 | Language policy: English outside the translated catalogs | pre-commit | `lint` |
 | Commit message format | commit-msg hook | `release-rules` (also the pull request title) |
-| `tests/smoke.sh`: one tip per call, no repeats, numbers, languages, filters | pre-push hook | `smoke` on Ubuntu and macOS |
+| `tests/smoke.sh`: one tip per call, no repeats, numbers, languages, filters | pre-push hook | `smoke` on Ubuntu (gawk and mawk) and macOS (BWK awk, bash 3.2) |
 | `claude plugin validate` for the marketplace and the plugin | `claude plugin validate .` | `plugin-validate` |
 | Permanent numbers, version bump, changelog entry | `scripts/check-release.sh origin/main` | `release-rules` |
 
