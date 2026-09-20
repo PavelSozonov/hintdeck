@@ -4,20 +4,10 @@
 
 Claude Code ships features faster than anyone reads changelogs. hintdeck turns the documentation into a habit: type `/tip`, learn one thing, try it in a minute.
 
-```
-> /tip
-
-Tip of the day #11: You can queue messages while Claude is working
-
-Pressing Enter while Claude works does not interrupt the turn, it queues the message. A regular
-message reaches the model as soon as the current tool calls finish — within the same turn; slash
-and ! commands wait for the turn to end. Changed your mind? Up from the first line of the input
-takes the queue back for editing.
-
-Try it now: during a long task type a clarification and press Enter, then Up to take it back.
-
-keys · #11 · shown 1 of 147
-```
+<p align="center">
+  <img src="docs/demo/tip.gif" width="900"
+       alt="A Claude Code session: the user types /tip keys and gets tip of the day #2 — Ctrl+G opens the prompt in your own editor — with a one-line action to try and the footer 'keys · #2 · shown 1 of 147'">
+</p>
 
 ## What is inside
 
@@ -25,6 +15,13 @@ keys · #11 · shown 1 of 147
 |---|---|
 | `tip` | One tip per call: keyboard shortcuts, slash commands, CLI flags, context and memory, settings and hooks, skills/subagents/MCP, parallel work, ways of working, recent additions. |
 | `tip-slides` | The same tip as a deck of 1–5 slides. A visual is added only when it answers a concrete question — which keys to press, in what order things happen, how the options differ. No decoration. |
+
+<p align="center">
+  <img src="docs/demo/slides-1.png" width="49%" alt="Slide 1 of the deck for tip #11: the title 'Enter while Claude works queues your message, it does not interrupt' with the Enter and Up keys drawn as keycaps">
+  <img src="docs/demo/slides-2.png" width="49%" alt="Slide 2: a flow diagram of the current turn showing that a queued regular message reaches the model when the current tool calls finish, while slash and ! commands wait for the turn to end">
+</p>
+
+`/tip-slides 11` — a two-slide deck: the keys to press, then a flow showing *when* a queued message reaches the model, the one thing the text alone does not show. A tip that is a single fact gets a single slide and no diagram.
 
 - **147 tips**, each verified against the official documentation and stamped with the CLI version it was checked on.
 - **No repeats, one at a time** — enforced by a script, not by the model's memory.
@@ -86,6 +83,7 @@ New tips and translations are welcome.
 
 - A tip is a section in `decks/claude-code/en/<topic>.md` with a `verified:` metadata line and a `**Try it:**` line; the format is in [`REFRESH.md`](plugins/hintdeck/skills/tip/REFRESH.md). Link the primary source in the pull request — tips without one are not accepted.
 - A translation is the same id in `decks/claude-code/<lang>/<topic>.md`. A new language is a new directory; untranslated tips fall back to English.
+- The demo in `docs/demo/` is a recording of a real session; `docs/demo/make-gif.sh` re-records it.
 - Before opening a pull request run `plugins/hintdeck/skills/tip/tip.sh number && plugins/hintdeck/skills/tip/tip.sh lint` and `claude plugin validate .`.
 
 ## License
