@@ -10,7 +10,8 @@ DECK_DIR="$DIR/decks/$DECK"
 ROOT="${HINTDECK_STATE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hintdeck}"
 STATE="$ROOT/$DECK"
 SHOWN="$STATE/shown.tsv"
-REFRESHED="$STATE/refreshed-version"
+# The version the catalog was verified against is a property of the catalog, so it ships with it.
+REFRESHED="$DECK_DIR/.verified-version"
 TICKETS="$ROOT/tickets"
 CHANGELOG_URL="https://code.claude.com/docs/en/changelog.md"
 DEFAULT_LANG="en"
@@ -204,7 +205,7 @@ cmd_list() {
   recent="$(tail -5 "$SHOWN" | cut -f1 | while read -r i; do printf '%s, ' "$(catalog | awk -F'\t' -v id="$i" '$1 == id { print "#" $7 " " $1 " (" $2 ")" }')"; done | sed 's/, $//')"
   echo "recently shown (vary the topic): $recent"
   if [ -n "$cli" ] && [ "$ref" != "none" ] && version_gt "$cli" "$ref"; then
-    echo "refresh: the CLI is newer than the catalog ($ref -> $cli) — after the tip add one reminder line about /tip refresh"
+    echo "refresh: the CLI is newer than the catalog ($ref -> $cli) — after the tip add the one-line refresh reminder"
   fi
   echo "ticket: $ticket"
   echo

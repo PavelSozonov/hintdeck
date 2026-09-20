@@ -60,7 +60,7 @@ reports `text-lang: en (no … translation yet)`, translate the tip faithfully a
 | Title | `**Tip of the day #<n>: <title>**` | `**Совет дня №<n>: <заголовок>**` |
 | Action | `**Try it now:**` | `**Попробуй сейчас:**` |
 | Footer | `*<topic> · #<n> · shown N of M*` | `*<тема> · №<n> · показано N из M*` |
-| Refresh reminder | `The CLI was updated (X → Y): /tip refresh adds what is new` | `CLI обновился (X → Y): /tip refresh добавит новинки` |
+| Refresh reminder | `The CLI was updated (X → Y): update hintdeck, or run /tip refresh, to get what is new` | `CLI обновился (X → Y): обнови hintdeck или запусти /tip refresh, чтобы получить новинки` |
 | Address | — | informal «ты» |
 
 For any other catalog language translate these labels the same way.
@@ -98,7 +98,7 @@ Four parts, in this order, labels from the table above:
 | `lang-offered` | record that the one-time language offer was made |
 | `status` | versions, language and counts by topic |
 | `changelog` | changelog entries newer than the last verified version |
-| `refreshed` | record that the catalog is verified against the installed CLI |
+| `refreshed` | record in the catalog that it is verified against the installed CLI |
 | `number` | give permanent numbers to new tips and copy them to the translations |
 | `lint` | catalog check: unique ids and numbers, metadata, translations in sync |
 | `reset` | clear the shown history — only when the user asks for it directly |

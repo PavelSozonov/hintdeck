@@ -54,14 +54,14 @@ plugins/hintdeck/skills/tip/
   DESIGN.md       this file
   tip.sh          list | take | show | history | status | lang | changelog | refreshed | number | lint | reset
   decks/<deck>/<lang>/<topic>.md   the catalog; topics: keys commands cli context config extend parallel practices new
-  decks/<deck>/.last-number
+  decks/<deck>/.last-number, decks/<deck>/.verified-version
 plugins/hintdeck/skills/tip-slides/
   SKILL.md        the same tip → a slide deck (Artifact Slides; HTML fallback)
   tip.sh          a wrapper around ../tip/tip.sh
   deck-template.html   the template of the HTML fallback
 <state> = ~/.claude/hintdeck/    (HINTDECK_STATE_DIR overrides it)
   lang, lang-offered, tickets/, slides/
-  <deck>/shown.tsv, <deck>/refreshed-version
+  <deck>/shown.tsv
 ```
 
 The state of an invocation is injected into SKILL.md dynamically (the `!` block), so the catalog
