@@ -1,0 +1,1 @@
+Describe what changes and why, in plain prose. This text becomes the body of the squash commit on main, so write it as a commit message: no headings, no checklists, no attribution lines. The title above becomes the commit subject: <type>(<scope>): <subject>.

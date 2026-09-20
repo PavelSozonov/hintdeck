@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Run the pre-commit hooks on every file
+        env:
+          SKIP: no-commit-to-branch   # a local guard; on GitHub the branch protection does this job
+          HINTDECK_STATE_DIR: ${{ runner.temp }}/hintdeck-state
+        run: |
+          pip install --quiet pre-commit
+          pre-commit run --all-files --show-diff-on-failure
+
+  smoke:
+    name: smoke (${{ matrix.os }}, ${{ matrix.awk }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, awk: gawk }     # bash 5
+          - { os: ubuntu-latest, awk: mawk }     # the default awk on Debian and Ubuntu
+          - { os: macos-latest, awk: system }    # bash 3.2 and BWK awk
+    steps:
+      - uses: actions/checkout@v4
+      - name: Put mawk first on the PATH as awk
+        if: matrix.awk == 'mawk'
+        run: |
+          sudo apt-get install -y -qq mawk
+          mkdir -p "$RUNNER_TEMP/awk-shim"
+          ln -s "$(command -v mawk)" "$RUNNER_TEMP/awk-shim/awk"
+          echo "$RUNNER_TEMP/awk-shim" >> "$GITHUB_PATH"
+      - name: Show the shell and awk under test
+        run: |
+          bash --version | head -1
+          (awk -W version 2>/dev/null || awk --version 2>/dev/null || echo "awk: BWK") | head -1
+      - name: Smoke test
+        run: tests/smoke.sh
+
+  plugin-validate:
+    name: plugin-validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Claude Code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s stable
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Validate the marketplace and the plugin
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
+        run: |
+          claude --version
+          claude plugin validate .
+          claude plugin validate ./plugins/hintdeck
