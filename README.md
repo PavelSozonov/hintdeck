@@ -77,6 +77,25 @@ Tips come in English unless you choose otherwise. The language is resolved in th
 
 Details: [`DESIGN.md`](plugins/hintdeck/skills/tip/DESIGN.md). Catalog maintenance: [`REFRESH.md`](plugins/hintdeck/skills/tip/REFRESH.md).
 
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `/tip` is not found right after installing | Run `/reload-plugins` (or `/reload-skills` for the symlink install), or restart Claude Code. |
+| Tips arrive in the wrong language | `/tip lang` shows the current language and where it came from; `/tip lang en` or `/tip lang ru` sets it, `/tip lang auto` forgets the choice. |
+| "No unseen tips left" | Run `/tip refresh` to pull in tips for newer releases, or ask for a tip again by number (`/tip 42`). To start the whole deck over, ask Claude to reset the tip history. |
+| The skill reports that shell execution is disabled | Your settings have `disableSkillShellExecution`; the skill then runs `tip.sh list` itself as an ordinary tool call, and everything else works the same. |
+| A tip looks outdated | Tips are stamped with the CLI version they were verified against. Update the plugin, or open an issue with the tip number. |
+| `/tip-slides` produced an HTML file instead of a hosted deck | The session had no Artifact tool (for example `claude -p`); the deck is in `~/.claude/hintdeck/slides/`. |
+
+## Privacy
+
+hintdeck collects nothing and talks to no remote service. It keeps its state locally in `~/.claude/hintdeck/`, reads a few of your Claude Code settings only to skip tips about features you already use, and goes online only when you run `/tip refresh`, which downloads the public Claude Code changelog and documentation. Details: [`SECURITY.md`](SECURITY.md).
+
+## Support
+
+Questions, bugs and tip corrections: [GitHub Issues](https://github.com/PavelSozonov/hintdeck/issues). Security reports: see [`SECURITY.md`](SECURITY.md).
+
 ## Contributing
 
 New tips and translations are welcome.
@@ -89,3 +108,5 @@ New tips and translations are welcome.
 ## License
 
 [MIT](LICENSE)
+
+hintdeck is an independent community project. It is not affiliated with, sponsored by or endorsed by Anthropic. "Claude" and "Claude Code" are trademarks of Anthropic.
