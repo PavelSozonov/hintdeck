@@ -1,0 +1,53 @@
+# Install once per clone:  pre-commit install
+# Run everything by hand:  pre-commit run --all-files
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: no-commit-to-branch          # main is the release branch: work on a branch, merge by pull request
+        args: [--branch, main]
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=600]
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+        args: [--severity=warning]
+
+  - repo: local
+    hooks:
+      - id: catalog-lint
+        name: tip catalog (ids, numbers, translations in sync)
+        entry: plugins/hintdeck/skills/tip/tip.sh lint --strict
+        language: system
+        pass_filenames: false
+        files: ^plugins/hintdeck/skills/tip/(decks/|tip\.sh$)
+      - id: english-only
+        name: language policy (English outside the translated catalogs)
+        entry: scripts/check-english.sh
+        language: system
+        pass_filenames: false
+      - id: commit-message
+        name: commit message (Conventional Commits, English, no trailers)
+        entry: scripts/check-commit-msg.sh
+        language: system
+        stages: [commit-msg]
+      - id: smoke-test
+        name: tip.sh smoke test
+        entry: tests/smoke.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

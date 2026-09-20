@@ -98,12 +98,7 @@ Questions, bugs and tip corrections: [GitHub Issues](https://github.com/PavelSoz
 
 ## Contributing
 
-New tips and translations are welcome.
-
-- A tip is a section in `decks/claude-code/en/<topic>.md` with a `verified:` metadata line and a `**Try it:**` line; the format is in [`REFRESH.md`](plugins/hintdeck/skills/tip/REFRESH.md). Link the primary source in the pull request — tips without one are not accepted.
-- A translation is the same id in `decks/claude-code/<lang>/<topic>.md`. A new language is a new directory; untranslated tips fall back to English.
-- The demo in `docs/demo/` is a recording of a real session; `docs/demo/make-gif.sh` re-records it.
-- Before opening a pull request run `plugins/hintdeck/skills/tip/tip.sh number && plugins/hintdeck/skills/tip/tip.sh lint` and `claude plugin validate .`.
+New tips, corrections and translations are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). `main` is the release branch that the plugin directory mirrors, so changes land through pull requests, and a change to the plugin ships only with a version bump. Release notes: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## License
 

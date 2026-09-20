@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Run the pre-commit hooks on every file
+        env:
+          SKIP: no-commit-to-branch   # a local guard; on GitHub the branch protection does this job
+          HINTDECK_STATE_DIR: ${{ runner.temp }}/hintdeck-state
+        run: |
+          pip install --quiet pre-commit
+          pre-commit run --all-files --show-diff-on-failure
+
+  smoke:
+    name: smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]   # mawk/gawk with bash 5, and BWK awk with bash 3.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show the shell and awk under test
+        run: |
+          bash --version | head -1
+          (awk -W version 2>/dev/null || awk --version 2>/dev/null || echo "awk: BWK") | head -1
+      - name: Smoke test
+        run: tests/smoke.sh
+
+  plugin-validate:
+    name: plugin-validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Claude Code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s stable
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Validate the marketplace and the plugin
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
+        run: |
+          claude --version
+          claude plugin validate .
+          claude plugin validate ./plugins/hintdeck
+
+  release-rules:
+    name: release-rules
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Permanent numbers, version bump and changelog
+        run: scripts/check-release.sh "origin/${{ github.base_ref }}"
+      - name: Commit messages
+        run: scripts/check-commit-msg.sh --range "origin/${{ github.base_ref }}..HEAD"
+      - name: Pull request title (it becomes the squash commit subject)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: scripts/check-commit-msg.sh --title "$PR_TITLE"

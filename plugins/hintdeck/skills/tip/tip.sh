@@ -171,7 +171,8 @@ catalog() {
 
 # candidates — unseen tips that pass the signal and version filters
 candidates() {
-  local sig=" $(signals) "
+  local sig
+  sig=" $(signals) "
   catalog | awk -F'\t' -v sig="$sig" -v shown="$SHOWN" -v cli="$(cli_version)" '
     function newer(a, b,   x, y) { split(a, x, "."); split(b, y, ".")
       if (x[1] != y[1]) return x[1]+0 > y[1]+0; if (x[2] != y[2]) return x[2]+0 > y[2]+0; return x[3]+0 > y[3]+0 }
@@ -331,13 +332,19 @@ cmd_number() {
   rm -f "$map"; echo "last number issued: $last"
 }
 
+# lint [--strict] — catalog check. Exits non-zero on errors; with --strict also on warnings
+# (a tip without a translation). CI and the pre-commit hook run it with --strict.
 cmd_lint() {
-  local bad=0 warn=0 dups f lang base
+  local bad=0 warn=0 strict=0 dups f lang base out last max
+  [ "${1:-}" = "--strict" ] && strict=1
   base="$(mktemp)"; parse_lang "$DEFAULT_LANG" > "$base"
   dups="$(cut -f1 "$base" | sort | uniq -d)"; [ -n "$dups" ] && { echo "duplicate ids: $dups"; bad=1; }
   dups="$(cut -f7 "$base" | sort | uniq -d)"; [ -n "$dups" ] && { echo "duplicate numbers: $dups"; bad=1; }
   awk -F'\t' '$1 !~ /^[a-z0-9-]+$/ { print "bad id: " $1; e = 1 } $3 == "" { print "no title: " $1; e = 1 }
               $7 !~ /^[0-9]+$/ { print "no number (run tip.sh number): " $1; e = 1 } END { exit e }' "$base" || bad=1
+  last="$(cat "$DECK_DIR/.last-number" 2>/dev/null || echo 0)"
+  max="$(cut -f7 "$base" | sort -n | tail -1)"
+  if [ "${max:-0}" -gt "$last" ]; then echo ".last-number ($last) is behind the highest number in use ($max): run tip.sh number"; bad=1; fi
   for lang in $(available_langs); do
     for f in "$DECK_DIR/$lang"/*.md; do
       awk -v f="$lang/$(basename "$f")" '
@@ -348,20 +355,22 @@ cmd_lint() {
         END { check(); exit e }' "$f" || bad=1
     done
     [ "$lang" = "$DEFAULT_LANG" ] && continue
-    # translations must mirror the canonical metadata; a missing translation is only a warning
-    parse_lang "$lang" | awk -F'\t' -v base="$base" -v lang="$lang" '
+    # translations must mirror the canonical metadata; a missing translation is a warning
+    out="$(parse_lang "$lang" | awk -F'\t' -v base="$base" -v lang="$lang" -v dl="$DEFAULT_LANG" '
       BEGIN { while ((getline l < base) > 0) { split(l, a, "\t"); topic[a[1]] = a[2]; meta[a[1]] = a[4] "|" a[5] "|" a[6] "|" a[7] } }
       { seen[$1] = 1
-        if (!($1 in meta)) { print lang ": " $1 ": not in the " "'"$DEFAULT_LANG"'" " catalog"; e = 1; next }
-        if (topic[$1] != $2) { print lang ": " $1 ": topic file differs (" $2 " vs " topic[$1] ")"; e = 1 }
-        if (meta[$1] != $4 "|" $5 "|" $6 "|" $7) { print lang ": " $1 ": needs/skip-if/since/n differ from the canonical tip"; e = 1 } }
-      END { for (id in meta) if (!(id in seen)) { print "warning: " lang ": no translation of " id; w++ }
-            if (w) print "warning: " w " tips fall back to the default language in " lang
-            exit e }' || bad=1
+        if (!($1 in meta)) { print "error: " lang ": " $1 ": not in the " dl " catalog"; next }
+        if (topic[$1] != $2) print "error: " lang ": " $1 ": topic file differs (" $2 " vs " topic[$1] ")"
+        if (meta[$1] != $4 "|" $5 "|" $6 "|" $7) print "error: " lang ": " $1 ": needs/skip-if/since/n differ from the canonical tip" }
+      END { for (id in meta) if (!(id in seen)) print "warning: " lang ": no translation of " id }')"
+    [ -n "$out" ] && printf '%s\n' "$out"
+    printf '%s\n' "$out" | grep -q '^error:' && bad=1
+    printf '%s\n' "$out" | grep -q '^warning:' && warn=1
   done
+  [ "$warn" = "1" ] && [ "$strict" = "1" ] && { echo "strict mode: untranslated tips are not allowed"; bad=1; }
   [ "$bad" = "0" ] && echo "OK: $(wc -l < "$base" | tr -d ' ') tips in deck '$DECK'; languages: $(available_langs); ids and numbers unique, metadata consistent"
   rm -f "$base"
-  return 0
+  return "$bad"
 }
 
 cmd_reset() { : > "$SHOWN"; echo "shown history cleared for deck '$DECK'"; }
@@ -378,8 +387,8 @@ case "${1:-list}" in
   refreshed) cmd_refreshed ;;
   number) cmd_number ;;
   slides-dir) mkdir -p "$ROOT/slides" && echo "$ROOT/slides" ;;
-  lint) cmd_lint ;;
+  lint) shift; cmd_lint "$@"; exit $? ;;
   reset) cmd_reset ;;
-  *) echo "usage: tip.sh [list | take <id|number> <ticket> | show <number> <ticket> | history | status | lang [code|auto] | lang-offered | changelog | refreshed | number | slides-dir | lint | reset]" ;;
+  *) echo "usage: tip.sh [list | take <id|number> <ticket> | show <number> <ticket> | history | status | lang [code|auto] | lang-offered | changelog | refreshed | number | slides-dir | lint [--strict] | reset]" ;;
 esac
 exit 0

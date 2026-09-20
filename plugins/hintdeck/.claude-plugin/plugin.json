@@ -1,7 +1,7 @@
 {
   "name": "hintdeck",
   "displayName": "hintdeck",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tip of the day for Claude Code and its CLI: keyboard shortcuts, commands, flags, context, hooks, skills, parallel work, recent additions. One doc-verified tip per call, never repeated, permanently numbered; tip-slides turns a tip into a slide deck. English by default, Russian available.",
   "author": {
     "name": "Pavel Sozonov",

@@ -15,6 +15,17 @@ This is a public repository.
 - Conventional Commits: `<type>(<scope>): <subject>`, with an English body that explains what
   changed and why. No `Co-Authored-By` or other trailers.
 
+## Branches and releases
+
+- `main` is the release branch: the Claude plugin directory mirrors it and installs read it. It is
+  protected — never commit or push to it directly. Work on a branch, open a pull request, merge by
+  squash once CI is green.
+- The clone that the personal `/tip` symlinks point to stays on `main`; develop in a separate
+  worktree (`git worktree add ../hintdeck-dev -b <branch> origin/main`).
+- A release is a version bump: any change under `plugins/hintdeck/` bumps `version` in
+  `plugins/hintdeck/.claude-plugin/plugin.json` and adds a `CHANGELOG.md` entry, otherwise installed
+  users never receive it. CI enforces this (`scripts/check-release.sh`).
+
 ## Catalog
 
 - `decks/<deck>/en/` is canonical: it owns ids, numbers (`n`) and metadata. Every change to an
@@ -25,8 +36,9 @@ This is a public repository.
 ## Before committing
 
 ```bash
-plugins/hintdeck/skills/tip/tip.sh lint
+pre-commit run --all-files   # whitespace, shellcheck, tip.sh lint --strict, language policy
+tests/smoke.sh               # the guarantees of tip.sh
 claude plugin validate .
 ```
 
-State (`~/.claude/hintdeck/`) is never committed.
+State (`~/.claude/hintdeck/`) is never committed. The full workflow is in `CONTRIBUTING.md`.
