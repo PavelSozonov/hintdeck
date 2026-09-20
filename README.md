@@ -6,7 +6,7 @@ Claude Code ships features faster than anyone reads changelogs. hintdeck turns t
 
 <p align="center">
   <img src="docs/demo/tip.gif" width="900"
-       alt="A Claude Code session: the user types /tip keys and gets tip of the day #2 — Ctrl+G opens the prompt in your own editor — with a one-line action to try and the footer 'keys · #2 · shown 1 of 147'">
+       alt="A Claude Code session: the user types /tip keys and gets tip of the day #2 — Ctrl+G opens the prompt in your own editor — with a one-line action to try and a footer showing the topic, the tip number and how many tips have been shown">
 </p>
 
 ## What is inside
@@ -23,7 +23,7 @@ Claude Code ships features faster than anyone reads changelogs. hintdeck turns t
 
 `/tip-slides 11` — a two-slide deck: the keys to press, then a flow showing *when* a queued message reaches the model, the one thing the text alone does not show. A tip that is a single fact gets a single slide and no diagram.
 
-- **147 tips**, each verified against the official documentation and stamped with the CLI version it was checked on.
+- **140+ tips and growing**, each verified against the official documentation and stamped with the CLI version it was checked on. `/tip refresh` adds tips for new releases and retires stale ones.
 - **No repeats, one at a time** — enforced by a script, not by the model's memory.
 - **Context-aware** — tips about things you already use (a status line, hooks, auto mode…) are skipped, tips that don't apply (worktrees outside a git repository, features newer than your CLI) are hidden, and the rest are matched to your current session.
 - **Permanent numbers** — every tip has a number you can refer to and ask for again: `/tip 42`.
