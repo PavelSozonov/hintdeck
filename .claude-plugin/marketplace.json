@@ -1,0 +1,14 @@
+{
+  "name": "hintdeck",
+  "description": "Tip of the day for Claude Code: a deck of doc-verified tips, one per call, never repeated.",
+  "owner": {
+    "name": "Pavel Sozonov"
+  },
+  "plugins": [
+    {
+      "name": "hintdeck",
+      "source": "./plugins/hintdeck",
+      "description": "Tip of the day for Claude Code and its CLI: doc-verified tips with no repeats and permanent numbers (/tip), and the same tips as purposeful slides (/tip-slides). English by default, Russian available."
+    }
+  ]
+}

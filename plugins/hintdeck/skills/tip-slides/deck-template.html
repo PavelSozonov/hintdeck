@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tip #{{N}} — {{SHORT TITLE}}</title>
+<style>
+  /* Tokens: light by default, dark when the system asks for it. One accent color. */
+  :root {
+    --bg: #f5f2ec; --fg: #1c1b19; --muted: #6d6860; --line: #d9d3c7; --panel: #ffffff;
+    --accent: #c2410c; --term: #1f1e1c; --term-fg: #ece8df; --term-dim: #8c867a; --backdrop: #12110f;
+    --sans: ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161618; --fg: #f1efe9; --muted: #a09b91; --line: #3a3a40; --panel: #232328;
+            --accent: #6ea0ff; --term: #0d0d0f; --term-fg: #ece8df; --term-dim: #8c867a; --backdrop: #000; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--backdrop); }
+  body { display: grid; place-items: center; overflow: hidden; font-family: var(--sans); }
+
+  /* A 16:9 stage; 1em = 1% of the stage width, so everything scales with the window */
+  .stage { position: relative; width: min(100vw, 177.78vh); aspect-ratio: 16 / 9;
+           font-size: calc(min(100vw, 177.78vh) / 100); background: var(--bg); color: var(--fg); overflow: hidden; }
+  .slide { position: absolute; inset: 0; padding: 4.6em 6em 5em; display: none; flex-direction: column; }
+  .slide.on { display: flex; }
+
+  h1 { font-size: 3.4em; line-height: 1.12; font-weight: 700; letter-spacing: -.015em; max-width: 24em; }
+  h1.sm { font-size: 2.8em; }
+  h1 .num { color: var(--accent); font-weight: 600; }
+  code, kbd, .mono { font-family: var(--mono); }
+  h1 code { font-size: .92em; font-weight: 600; }
+  .lead { margin-top: 1.1em; font-size: 1.75em; line-height: 1.42; color: var(--muted); max-width: 42em; }
+  .body { margin-top: 2.2em; font-size: 1.5em; line-height: 1.45; }
+
+  /* Keys: .key is a keycap, .plus the sign between keys, .keys a row of combinations */
+  .keys { margin-top: 2.2em; display: flex; align-items: center; gap: 1.6em; flex-wrap: wrap; }
+  .combo { display: flex; align-items: center; gap: .55em; }
+  .key { font-family: var(--mono); font-size: 1.9em; font-weight: 600; line-height: 1; min-width: 2.3em;
+         padding: .62em .7em .7em; text-align: center; background: var(--panel);
+         border: .06em solid var(--line); border-bottom-width: .22em; border-radius: .38em; }
+  .key.sm { font-size: 1em; min-width: 0; padding: .4em .55em .45em; }
+  .plus, .note { color: var(--muted); font-size: 1.45em; }
+
+  /* Terminal: the exact command; output only when the tip describes it */
+  .term { margin-top: 1.6em; padding: 1em 1.2em; border-radius: .5em; background: var(--term); color: var(--term-fg);
+          font-family: var(--mono); font-size: 1.45em; line-height: 1.5; white-space: pre-wrap; }
+  .term .dim { color: var(--term-dim); } .term .hl { color: var(--accent); }
+
+  /* Comparison and before → after */
+  table { margin-top: 1.8em; width: 100%; border-collapse: collapse; font-size: 1.4em; line-height: 1.35; }
+  th, td { text-align: left; vertical-align: top; padding: .7em .9em; border-bottom: .08em solid var(--line); }
+  th { color: var(--muted); font-weight: 600; } td.diff { color: var(--accent); font-weight: 600; }
+  .cols { margin-top: 1.8em; display: grid; grid-template-columns: 1fr 1fr; gap: 2em; font-size: 1.4em; line-height: 1.4; }
+  .cols h2 { font-size: .8em; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .6em; }
+
+  /* Diagrams: inline SVG, colors only through tokens (stroke="var(--line)", fill="var(--accent)") */
+  .diagram { margin-top: 1.8em; flex: 1; min-height: 0; } .diagram svg { width: 100%; height: 100%; }
+  .diagram text { font-family: var(--sans); font-size: 22px; fill: var(--fg); }
+  .diagram text.m { fill: var(--muted); } .diagram text.a { fill: var(--accent); font-weight: 700; }
+  .diagram text.k { font-family: var(--mono); font-weight: 600; }
+
+  .try { margin-top: auto; padding: 1.1em 1.4em; border-left: .3em solid var(--accent); background: var(--panel);
+         border-radius: 0 .5em .5em 0; font-size: 1.5em; line-height: 1.45; }
+  .try b { color: var(--accent); margin-right: .4em; }
+  .foot { position: absolute; left: 6em; right: 6em; bottom: 1.6em; display: flex; justify-content: space-between;
+          font-size: 1.05em; color: var(--muted); }
+</style>
+</head>
+<body>
+<main class="stage">
+
+  <!-- SLIDE 1 (always): number, the title as a statement, the point. Blocks below .lead are only the
+       ones that passed the "Does it need a visual" table in SKILL.md. In a one-slide deck the .try
+       block lives here too. All visible text is in the reply language. -->
+  <section class="slide on">
+    <h1><span class="num">#{{N}} ·</span> {{TITLE AS A STATEMENT}}</h1>
+    <p class="lead">{{THE POINT: one or two sentences}}</p>
+
+    <!-- a keys block, for example:
+    <div class="keys"><div class="combo"><kbd class="key">Ctrl</kbd><span class="plus">+</span><kbd class="key">S</kbd></div></div> -->
+    <!-- a terminal block, for example:
+    <div class="term"><span class="dim">$ </span>claude -w feature-auth</div> -->
+
+    <div class="try"><b>{{Try it now:}}</b>{{THE EXACT ACTION}}</div>
+    <div class="foot"><span>{{Tip of the day}} #{{N}} · {{topic}}</span><span class="pos"></span></div>
+  </section>
+
+  <!-- MORE SLIDES — only when the content calls for them (see "How many slides").
+       <section class="slide"> <h1 class="sm">…a statement…</h1> <div class="diagram"><svg viewBox="0 0 1400 420">…</svg></div>
+       <div class="foot">…</div> </section>
+       The .try block moves to the last slide. -->
+
+</main>
+<script>
+  // Navigation: arrows, space, PageUp/PageDown, click; #2 in the address opens the second slide
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = 0;
+  function go(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => s.classList.toggle('on', n === cur));
+    document.querySelectorAll('.pos').forEach(p => p.textContent = slides.length > 1 ? `${cur + 1} / ${slides.length}` : '');
+    history.replaceState(null, '', '#' + (cur + 1));
+  }
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) go(cur + 1);
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) go(cur - 1);
+  });
+  addEventListener('click', e => go(cur + (e.clientX > innerWidth / 2 ? 1 : -1)));
+  go((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+.DS_Store
+# runtime state lives in ~/.claude/hintdeck; ignore stray copies
+state/
+slides/
