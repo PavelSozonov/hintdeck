@@ -3,6 +3,10 @@
 Versions follow [semantic versioning](https://semver.org). The version lives in
 `plugins/hintdeck/.claude-plugin/plugin.json`; installed users receive an update only when it changes.
 
+## [Unreleased]
+
+Changes merged with the `skip-release` label are collected here until the next version bump.
+
 ## [0.1.1] - 2026-09-21
 
 ### Changed

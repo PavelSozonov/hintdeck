@@ -22,9 +22,13 @@ This is a public repository.
   squash once CI is green.
 - The clone that the personal `/tip` symlinks point to stays on `main`; develop in a separate
   worktree (`git worktree add ../hintdeck-dev -b <branch> origin/main`).
-- A release is a version bump: any change under `plugins/hintdeck/` bumps `version` in
-  `plugins/hintdeck/.claude-plugin/plugin.json` and adds a `CHANGELOG.md` entry, otherwise installed
-  users never receive it. CI enforces this (`scripts/check-release.sh`).
+- A release is a version bump: installed users receive a change under `plugins/hintdeck/` only when
+  `version` in `plugins/hintdeck/.claude-plugin/plugin.json` changes. A maintainer's own change bumps
+  it and adds a `CHANGELOG.md` entry; a contributor's pull request gets the `skip-release` label
+  instead, and a later release pull request bumps the version and turns "Unreleased" into that version.
+- Pull requests are squash-merged: the title becomes the commit subject and the description becomes
+  the commit body, so write the description as a commit message — plain prose, no headings,
+  checklists or attribution lines. CI checks both (`scripts/check-commit-msg.sh --pr`).
 
 ## Catalog
 

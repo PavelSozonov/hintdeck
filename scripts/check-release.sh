@@ -4,7 +4,8 @@
 # 1. Permanent numbers: a tip's number never changes and is never reused.
 # 2. Versioning: plugin.json sets an explicit version, so installed users receive an update only
 #    when that version changes. Any change under plugins/hintdeck/ must bump it and must have a
-#    CHANGELOG.md entry.
+#    CHANGELOG.md entry — unless SKIP_RELEASE=true (the skip-release label), which leaves the bump
+#    to a later release pull request.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 BASE="${1:?usage: check-release.sh <base-ref>}"
@@ -37,12 +38,15 @@ for d in "$DECKS"/*/; do
   rm -f "$old" "$new"
 done
 
-if ! git diff --quiet "$BASE" -- "$PLUGIN"; then
+if [ "${SKIP_RELEASE:-false}" = "true" ]; then
+  echo "skip-release: the version check is skipped; a release pull request will bump the version later"
+elif ! git diff --quiet "$BASE" -- "$PLUGIN"; then
   old_v="$(git show "$BASE:$PLUGIN/.claude-plugin/plugin.json" 2>/dev/null | sed -n 's/.*"version"[^"]*"\([^"]*\)".*/\1/p' | head -1)"
   new_v="$(sed -n 's/.*"version"[^"]*"\([^"]*\)".*/\1/p' "$PLUGIN/.claude-plugin/plugin.json" | head -1)"
   if [ "$old_v" = "$new_v" ]; then
     echo "files under $PLUGIN changed but the version is still $new_v."
-    echo "  Installed users only receive an update when the version changes: bump it in $PLUGIN/.claude-plugin/plugin.json"
+    echo "  Installed users only receive an update when the version changes: bump it in $PLUGIN/.claude-plugin/plugin.json,"
+    echo "  or ask a maintainer for the skip-release label so the bump happens in a release pull request."
     bad=1
   elif [ "$(printf '%s\n%s\n' "$old_v" "$new_v" | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)" != "$new_v" ]; then
     echo "the version went backwards: $old_v -> $new_v"; bad=1

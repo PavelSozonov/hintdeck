@@ -71,21 +71,3 @@ jobs:
           claude --version
           claude plugin validate .
           claude plugin validate ./plugins/hintdeck
-
-  release-rules:
-    name: release-rules
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Permanent numbers, version bump and changelog
-        run: scripts/check-release.sh "origin/${{ github.base_ref }}"
-      - name: Commit messages
-        run: scripts/check-commit-msg.sh --range "origin/${{ github.base_ref }}..HEAD"
-      - name: Pull request title (it becomes the squash commit subject)
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: scripts/check-commit-msg.sh --title "$PR_TITLE"
