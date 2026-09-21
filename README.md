@@ -9,6 +9,8 @@ Claude Code ships features faster than anyone reads changelogs. hintdeck turns t
        alt="A Claude Code session: the user types /tip keys and gets tip of the day #2 — Ctrl+G opens the prompt in your own editor — with a one-line action to try and a footer showing the topic, the tip number and how many tips have been shown">
 </p>
 
+<p align="center"><em>The recording asks for a topic with <code>/tip keys</code>. A bare <code>/tip</code> picks for your session instead — see <a href="#how-a-tip-is-picked">How a tip is picked</a>.</em></p>
+
 ## What is inside
 
 | Skill | What it does |
@@ -25,9 +27,31 @@ Claude Code ships features faster than anyone reads changelogs. hintdeck turns t
 
 - **140+ tips and growing**, each verified against the official documentation and stamped with the CLI version it was checked on. `/tip refresh` adds tips for new releases and retires stale ones.
 - **No repeats, one at a time** — enforced by a script, not by the model's memory.
-- **Context-aware** — tips about things you already use (a status line, hooks, auto mode…) are skipped, tips that don't apply (worktrees outside a git repository, features newer than your CLI) are hidden, and the rest are matched to your current session.
+- **Context-aware** — skips what you already use, hides what cannot apply to you, and matches the rest to what your session is doing: [How a tip is picked](#how-a-tip-is-picked).
 - **Permanent numbers** — every tip has a number you can refer to and ask for again: `/tip 42`.
 - **Multilingual** — English by default, Russian available: `/tip lang ru`.
+
+## How a tip is picked
+
+`/tip` does not draw at random. Three things narrow the deck, in this order:
+
+1. **What you have seen.** A shown tip never comes back on its own; the history lives in `~/.claude/hintdeck/`.
+2. **What you already use, and what cannot apply.** Before the model sees anything, a script reads a few facts about your setup and drops the tips they make pointless. You have a status line, so no tip about setting one up. You are not in a git repository, so no worktree tips. Your CLI is older than a feature, so that tip waits. This step is deterministic.
+3. **What fits the moment.** The model reads the remaining titles against the conversation so far — the task, what went wrong recently, the tools in use — and takes the closest match. The reply then says why the tip matters *here*, and fills "Try it now" with details from your own work where it can.
+
+A real exchange, two hours into a debugging session:
+
+> *We have been debugging a flaky integration test for two hours in this session and the context is getting full of failed attempts and long logs. Before we continue: give me a tip of the day.*
+>
+> **Tip of the day #80: Two failed corrections in a row mean it is time to start over**
+>
+> If you've corrected Claude twice on the same issue and the result is still wrong, the context is already full of failed attempts. A clean session with a better prompt almost always beats a long one with piled-up corrections. That fits your flaky-test session: after two hours of dead ends and long logs, a fresh start would carry only what you've learned.
+>
+> **Try it now:** Write a short summary of what you know about the flaky test. Include what you've ruled out, the conditions that trigger the failure, and the current hypothesis. Then run `/clear` and start the next session with that summary as a new, more specific prompt.
+>
+> *context · #80 · shown 1 of 147*
+
+Step 3 is the model's judgement, not a guarantee. In a fresh session there is nothing to go on yet, so `/tip` simply varies the topic; name one yourself (`/tip hooks`) to steer it. A one-off run from the shell, such as `claude -p "/tip" --model sonnet`, has no conversation either: it is cheaper and keeps the tip out of your working session's context, at the price of step 3.
 
 ## Install
 
