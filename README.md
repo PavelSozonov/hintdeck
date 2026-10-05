@@ -4,12 +4,9 @@
 
 Claude Code ships features faster than anyone reads changelogs. hintdeck turns the documentation into a habit: type `/tip`, learn one thing, try it in a minute.
 
-<p align="center">
-  <img src="docs/demo/tip.gif" width="900"
-       alt="A Claude Code session: the user types /tip keys and gets tip of the day #2 — Ctrl+G opens the prompt in your own editor — with a one-line action to try and a footer showing the topic, the tip number and how many tips have been shown">
-</p>
+![A Claude Code session: the user types /tip keys and gets tip of the day #2, Ctrl+G opens the prompt in your own editor, with a one-line action to try and a footer showing the topic, the tip number and how many tips have been shown](plugins/hintdeck/assets/tip.gif)
 
-<p align="center"><em>The recording asks for a topic with <code>/tip keys</code>. A bare <code>/tip</code> picks for your session instead — see <a href="#how-a-tip-is-picked">How a tip is picked</a>.</em></p>
+*The recording asks for a topic with `/tip keys`. A bare `/tip` picks for your session instead — see [How a tip is picked](#how-a-tip-is-picked).*
 
 ## What is inside
 
@@ -18,10 +15,9 @@ Claude Code ships features faster than anyone reads changelogs. hintdeck turns t
 | `tip` | One tip per call: keyboard shortcuts, slash commands, CLI flags, context and memory, settings and hooks, skills/subagents/MCP, parallel work, ways of working, recent additions. |
 | `tip-slides` | The same tip as a deck of 1–5 slides. A visual is added only when it answers a concrete question — which keys to press, in what order things happen, how the options differ. No decoration. |
 
-<p align="center">
-  <img src="docs/demo/slides-1.png" width="49%" alt="Slide 1 of the deck for tip #11: the title 'Enter while Claude works queues your message, it does not interrupt' with the Enter and Up keys drawn as keycaps">
-  <img src="docs/demo/slides-2.png" width="49%" alt="Slide 2: a flow diagram of the current turn showing that a queued regular message reaches the model when the current tool calls finish, while slash and ! commands wait for the turn to end">
-</p>
+![Slide 1 of the deck for tip #11: the title "Enter while Claude works queues your message, it does not interrupt" with the Enter and Up keys drawn as keycaps](plugins/hintdeck/assets/slides-1.png)
+
+![Slide 2: a flow diagram of the current turn showing that a queued regular message reaches the model when the current tool calls finish, while slash and ! commands wait for the turn to end](plugins/hintdeck/assets/slides-2.png)
 
 `/tip-slides 11` — a two-slide deck: the keys to press, then a flow showing *when* a queued message reaches the model, the one thing the text alone does not show. A tip that is a single fact gets a single slide and no diagram.
 
@@ -112,9 +108,18 @@ Details: [`DESIGN.md`](plugins/hintdeck/skills/tip/DESIGN.md). Catalog maintenan
 | A tip looks outdated | Tips are stamped with the CLI version they were verified against. Update the plugin, or open an issue with the tip number. |
 | `/tip-slides` produced an HTML file instead of a hosted deck | The session had no Artifact tool (for example `claude -p`); the deck is in `~/.claude/hintdeck/slides/`. |
 
+## What it runs, reads and fetches
+
+hintdeck is two skills and one bash script, `tip.sh`. It ships no MCP servers, hooks, binaries or background processes, and it collects nothing.
+
+- **Runs:** `tip.sh` when a skill is invoked, to list the unseen tips and to hand out one. The skills pre-approve that script and nothing else. `tip-slides` also asks Claude to build a deck: an artifact where the session has the Artifact tool, otherwise a local HTML file that it opens.
+- **Reads:** the tip catalog in the plugin folder, and — only to skip tips about features you already use — whether a few keys exist in your Claude Code `settings.json` and whether files such as `keybindings.json`, `CLAUDE.md` and `.mcp.json` exist. It also runs `claude --version` and `git rev-parse`. None of this is stored or sent anywhere.
+- **Writes:** only its own state in `~/.claude/hintdeck/` (or `HINTDECK_STATE_DIR`): the shown history, the chosen tip language, single-use tickets and locally generated decks.
+- **Fetches:** nothing in normal use. Only `/tip refresh`, which you run yourself, downloads the public Claude Code changelog and documentation pages from `code.claude.com` so that Claude can add tips for new releases to the catalog.
+
 ## Privacy
 
-hintdeck collects nothing and talks to no remote service. It keeps its state locally in `~/.claude/hintdeck/`, reads a few of your Claude Code settings only to skip tips about features you already use, and goes online only when you run `/tip refresh`, which downloads the public Claude Code changelog and documentation. Details: [`SECURITY.md`](SECURITY.md).
+No personal data is collected, no telemetry is sent and there is no remote service. Details and how to report a vulnerability: [`SECURITY.md`](SECURITY.md).
 
 ## Support
 

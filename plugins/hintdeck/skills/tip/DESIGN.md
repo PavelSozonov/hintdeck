@@ -57,8 +57,11 @@ plugins/hintdeck/skills/tip/
   decks/<deck>/.last-number, decks/<deck>/.verified-version
 plugins/hintdeck/skills/tip-slides/
   SKILL.md        the same tip → a slide deck (Artifact Slides; HTML fallback)
-  tip.sh          a wrapper around ../tip/tip.sh
+  tip.sh          an identical copy of ../tip/tip.sh; it finds the catalog in ../tip/decks
   deck-template.html   the template of the HTML fallback
+plugins/hintdeck/
+  README.md, LICENSE   derived from the repository's own, for the directory listing and installs
+  assets/              the demo images the README shows
 <state> = ~/.claude/hintdeck/    (HINTDECK_STATE_DIR overrides it)
   lang, lang-offered, tickets/, slides/
   <deck>/shown.tsv
@@ -72,6 +75,11 @@ and stays out of git.
 
 Decks are a directory level of their own (`HINTDECK_DECK`, default `claude-code`) so that catalogs
 for other tools can be added later without renumbering: a tip is addressed as `<deck>#<number>`.
+
+The Claude plugin directory reads only the plugin folder and does not follow a script that runs
+another file, so the folder is self-contained: `scripts/sync-plugin-files.sh` derives its README
+and LICENSE from the repository's and copies `tip.sh` into `tip-slides`, and CI fails when any of
+the three is out of date.
 
 ## Catalog rule
 

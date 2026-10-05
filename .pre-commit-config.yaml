@@ -35,6 +35,11 @@ repos:
         language: system
         pass_filenames: false
         files: ^plugins/hintdeck/skills/tip/(decks/|tip\.sh$)
+      - id: plugin-files-in-sync
+        name: derived plugin files (README, LICENSE, tip-slides/tip.sh) in sync
+        entry: scripts/sync-plugin-files.sh --check
+        language: system
+        pass_filenames: false
       - id: english-only
         name: language policy (English outside the translated catalogs)
         entry: scripts/check-english.sh

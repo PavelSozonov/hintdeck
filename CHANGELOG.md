@@ -7,6 +7,16 @@ Versions follow [semantic versioning](https://semver.org). The version lives in
 
 Changes merged with the `skip-release` label are collected here until the next version bump.
 
+## [0.1.2] - 2026-10-06
+
+### Changed
+- The plugin folder is now self-contained for the Claude plugin directory, which reads nothing
+  outside it: it carries its own `README.md` (generated from the repository README), a `LICENSE`
+  and the demo images in `assets/`.
+- `tip-slides` ships an identical copy of `tip.sh` instead of a wrapper that ran the `tip` skill's
+  script, so that no script runs another file. Behaviour is unchanged.
+- The README states what the plugin runs, reads, writes and fetches.
+
 ## [0.1.1] - 2026-09-21
 
 ### Changed

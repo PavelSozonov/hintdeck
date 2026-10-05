@@ -11,7 +11,8 @@ days; fixes are released as a new plugin version and noted in the advisory.
 
 ## Scope and what the plugin does
 
-hintdeck is two skills and one bash script (`plugins/hintdeck/skills/tip/tip.sh`). It ships no MCP
+hintdeck is two skills and one bash script, `plugins/hintdeck/skills/tip/tip.sh`, of which
+`tip-slides` carries an identical copy. It ships no MCP
 servers, hooks, binaries or background processes.
 
 - **Files it writes:** only its own state under `~/.claude/hintdeck/` (or `HINTDECK_STATE_DIR`):

@@ -82,7 +82,7 @@ printf '{\n  "statusLine": {"type": "command"}\n}\n' > "$CLAUDE_CONFIG_DIR/setti
 refute "skip-if hides what the user already has" "$("$TIP" list)" "| cmd-statusline |"
 rm -f "$CLAUDE_CONFIG_DIR/settings.json"
 
-check "the tip-slides wrapper reaches tip.sh"    "$("$WRAPPER" status)" "deck: claude-code"
+check "the tip-slides copy finds the catalog"    "$("$WRAPPER" status)" "tips: 14"
 dir="$("$WRAPPER" slides-dir)"
 [ -d "$dir" ] && ok "slides-dir creates the directory" || fail "slides-dir creates the directory" "$dir"
 
