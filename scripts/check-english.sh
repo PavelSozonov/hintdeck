@@ -3,7 +3,7 @@
 # and the few files that quote localized reply labels or match language names.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-ALLOWED='^plugins/hintdeck/skills/tip/decks/[^/]+/[a-z-]+/|^plugins/hintdeck/skills/tip/(SKILL|REFRESH)\.md$|^plugins/hintdeck/skills/tip-slides/SKILL\.md$|^plugins/hintdeck/skills/tip/tip\.sh$'
+ALLOWED='^plugins/hintdeck/skills/tip/decks/[^/]+/[a-z-]+/|^plugins/hintdeck/skills/tip/(SKILL|REFRESH)\.md$|^plugins/hintdeck/skills/tip-slides/SKILL\.md$|^plugins/hintdeck/skills/tip(-slides)?/tip\.sh$'
 CANON='^plugins/hintdeck/skills/tip/decks/[^/]+/en/'
 cyrillic="$(printf '[\320-\323]')"   # UTF-8 lead bytes of U+0400–U+04FF
 bad=0

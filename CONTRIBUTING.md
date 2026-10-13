@@ -41,6 +41,7 @@ code: `git worktree add ../hintdeck-dev -b <branch> origin/main`.
 | Whitespace, JSON/YAML, large files, shellcheck | pre-commit | `lint` |
 | Catalog: unique ids and numbers, translations in sync (`tip.sh lint --strict`) | pre-commit | `lint` |
 | Language policy: English outside the translated catalogs | pre-commit | `lint` |
+| Derived plugin files in sync (`scripts/sync-plugin-files.sh --check`) | pre-commit | `lint` |
 | Commit subject and body | commit-msg hook (optional) | `release-rules`: the pull request title and description |
 | `tests/smoke.sh`: one tip per call, no repeats, numbers, languages, filters | pre-push hook | `smoke` on Ubuntu (gawk and mawk) and macOS (BWK awk, bash 3.2) |
 | `claude plugin validate` for the marketplace and the plugin | `claude plugin validate .` | `plugin-validate` |
@@ -67,7 +68,22 @@ to be translated, so a partial language needs a follow-up change to the check be
 Also teach `normalize_lang` in `tip.sh` the names of the language, and add its reply labels to the
 "Language" table in the `tip` skill.
 
+## Files derived for the plugin folder
+
+The Claude plugin directory reads only `plugins/hintdeck/`, and installs receive nothing outside it.
+Three files there are generated, so edit their sources and run `scripts/sync-plugin-files.sh`:
+
+| Edit this | To change this |
+|---|---|
+| `README.md` | `plugins/hintdeck/README.md`, which the directory shows as the listing |
+| `LICENSE` | `plugins/hintdeck/LICENSE` |
+| `plugins/hintdeck/skills/tip/tip.sh` | `plugins/hintdeck/skills/tip-slides/tip.sh` |
+
+Write images in the README with Markdown syntax and keep them in `plugins/hintdeck/assets/`: the
+directory shows only images that ship inside the plugin folder.
+
 ## The demo in the README
 
-`docs/demo/tip.gif` is a recording of a real session. `docs/demo/make-gif.sh` re-records it on an
-isolated state; review every frame for personal details before committing a new recording.
+The GIF in `plugins/hintdeck/assets/` is a recording of a real session. `docs/demo/make-gif.sh`
+re-records it on an isolated state; review every frame for personal details before committing a
+new recording.

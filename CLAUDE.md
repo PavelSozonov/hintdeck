@@ -30,6 +30,12 @@ This is a public repository.
   the commit body, so write the description as a commit message — plain prose, no headings,
   checklists or attribution lines. CI checks both (`scripts/check-commit-msg.sh --pr`).
 
+## Derived files
+
+- `plugins/hintdeck/README.md`, `plugins/hintdeck/LICENSE` and
+  `plugins/hintdeck/skills/tip-slides/tip.sh` are generated. Edit `README.md`, `LICENSE` and
+  `plugins/hintdeck/skills/tip/tip.sh`, then run `scripts/sync-plugin-files.sh`.
+
 ## Catalog
 
 - `decks/<deck>/en/` is canonical: it owns ids, numbers (`n`) and metadata. Every change to an

@@ -1,4 +1,4 @@
-# VHS tape for docs/demo/tip.gif — https://github.com/charmbracelet/vhs
+# VHS tape for plugins/hintdeck/assets/tip.gif — https://github.com/charmbracelet/vhs
 # Records a real interactive Claude Code session. Run it through make-gif.sh, which sets up an
 # isolated hintdeck state, a throwaway project and assembles the GIF from the raw frames.
 Output frames/

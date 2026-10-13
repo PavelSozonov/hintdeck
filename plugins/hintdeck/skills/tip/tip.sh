@@ -2,6 +2,10 @@
 # tip.sh — state keeping and tip delivery for the hintdeck skills.
 # It enforces mechanically what a model cannot be trusted to remember:
 # a tip is never repeated, and one skill invocation yields exactly one tip.
+#
+# The tip-slides skill carries an identical copy of this file, kept in sync by
+# scripts/sync-plugin-files.sh, so that each skill runs a script from its own folder and
+# no script has to run another file. The catalog lives with the tip skill.
 set -u
 DIR="$(cd "$(dirname "$0")" && pwd)"
 DECK="${HINTDECK_DECK:-claude-code}"
@@ -12,7 +16,13 @@ if ! safe_name "$DECK"; then
   echo "ERROR: invalid deck name '$DECK' — HINTDECK_DECK takes lowercase letters, digits and hyphens."
   exit 0
 fi
-DECK_DIR="$DIR/decks/$DECK"
+DECKS="$DIR/decks"
+[ -d "$DECKS" ] || DECKS="$DIR/../tip/decks"
+DECK_DIR="$DECKS/$DECK"
+if [ ! -d "$DECK_DIR" ]; then
+  echo "ERROR: the tip catalog was not found at $DECK_DIR. tip-slides needs the tip skill installed next to it."
+  exit 0
+fi
 # State lives outside the skill directory: it survives plugin updates and stays out of git.
 ROOT="${HINTDECK_STATE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hintdeck}"
 STATE="$ROOT/$DECK"
