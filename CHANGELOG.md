@@ -7,6 +7,21 @@ Versions follow [semantic versioning](https://semver.org). The version lives in
 
 Changes merged with the `skip-release` label are collected here until the next version bump.
 
+## [0.1.2] - 2026-10-14
+
+### Security
+- `tip.sh take` and `show` removed `<tickets>/<ticket>` without checking the ticket, so a ticket
+  such as `../../file` deleted any file the user could write. A ticket must now have the exact form
+  `list` issues (`t` followed by digits), and it is removed only when it is a regular file, not a
+  symlink, whose canonical directory is the tickets directory; tickets are created without
+  following an existing file or symlink.
+- A language code from `/tip lang`, `HINTDECK_LANG`, the saved choice or a project's `language`
+  setting, and the `HINTDECK_DECK` name, may no longer contain a path: `..` or `/` made the script
+  read tips from, and keep state in, directories outside its own.
+
+### Added
+- Smoke tests for path traversal through tickets, language codes and deck names.
+
 ## [0.1.1] - 2026-09-21
 
 ### Changed

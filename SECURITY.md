@@ -19,6 +19,10 @@ servers, hooks, binaries or background processes.
 - **Files it reads:** the tip catalog in the plugin directory, and — to skip tips about features
   you already use — the presence of a few keys in your Claude Code `settings.json` and of files
   such as `keybindings.json`, `CLAUDE.md`, `.mcp.json`. Their contents are not stored or sent anywhere.
+- **Untrusted arguments:** a ticket, a language code and a deck name are checked against the
+  exact form the script itself uses before they reach the filesystem, so a path such as
+  `../../file` is refused. A ticket is removed only when it is a regular file, not a symlink,
+  directly inside the tickets directory.
 - **Network:** none during normal use. Only `/tip refresh` downloads the public Claude Code
   changelog and documentation from `code.claude.com`, at the user's request.
 - **Data collection:** none. There is no telemetry and no remote service.

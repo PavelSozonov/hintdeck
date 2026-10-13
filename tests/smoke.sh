@@ -88,6 +88,41 @@ dir="$("$WRAPPER" slides-dir)"
 
 "$TIP" lint --strict >/dev/null && ok "lint --strict passes on the catalog" || fail "lint --strict passes on the catalog"
 
+# Arguments are untrusted: a ticket, a language or a deck name must never reach a file outside the
+# state and catalog directories. Every attempt is refused and leaves the victim file untouched.
+victim="$WORK/victim.txt"
+echo keep > "$victim"
+mkdir -p "$WORK/state/tickets"
+outside="$WORK/outside"; mkdir -p "$outside"; echo keep > "$outside/t123"
+ln -s "$outside/t123" "$WORK/state/tickets/t999"
+ln -s "$outside" "$WORK/state/tickets/t998"
+for bad in "../victim.txt" "../../victim.txt" "$victim" "../../../../../../../..$victim" \
+           "" "-rf" "-" "." ".." "t1/../../../victim.txt" "t1/x" "t" "tx1" "t1 " " t1" "t999" "t998" "t998/t123"; do
+  out="$("$TIP" take "$(unseen_id)" "$bad" 2>&1)"
+  case "$out" in REFUSED:*) ok "a bad ticket '$bad' is refused" ;; *) fail "a bad ticket '$bad' is refused" "$out" ;; esac
+done
+[ "$(cat "$victim")" = "keep" ] && ok "traversal tickets leave files outside the state untouched" || fail "traversal tickets leave files outside the state untouched"
+[ -f "$outside/t123" ] && [ -L "$WORK/state/tickets/t999" ] && ok "a symlinked ticket is neither followed nor consumed" || fail "a symlinked ticket is neither followed nor consumed"
+rm -f "$WORK/state/tickets/t999" "$WORK/state/tickets/t998"
+out="$("$TIP" show "$num1" "$(ticket)")"
+check "a valid ticket still works after the refusals" "$out" "## $id1"
+
+rel="../../../../../../../../../..$WORK"
+check "a path as a language is refused"           "$("$TIP" lang "$rel")" "REFUSED: no catalog for"
+check "a parent dir as a language is refused"     "$("$TIP" lang ..)"     "REFUSED: no catalog for"
+check "a path in HINTDECK_LANG is ignored"        "$(HINTDECK_LANG=.. "$TIP" lang)" "lang: en (source: default)"
+printf '{\n  "language": "../claude-code/ru"\n}\n' > "$CLAUDE_CONFIG_DIR/settings.json"
+check "a path in the language setting is ignored" "$("$TIP" lang)" "lang: en (source: default)"
+rm -f "$CLAUDE_CONFIG_DIR/settings.json"
+printf '..\n' > "$HINTDECK_STATE_DIR/lang"
+check "a path in the saved language is ignored"  "$("$TIP" list)" "lang: en (source: default)"
+rm -f "$HINTDECK_STATE_DIR/lang"
+
+mkdir -p "$WORK/deckvictim"; echo keep > "$WORK/deckvictim/shown.tsv"
+out="$(HINTDECK_DECK="../deckvictim" "$TIP" reset 2>&1)"
+check "a path as a deck name is refused"          "$out" "ERROR: invalid deck name"
+[ "$(cat "$WORK/deckvictim/shown.tsv")" = "keep" ] && ok "a bad deck name touches nothing" || fail "a bad deck name touches nothing"
+
 # Work on a copy for anything that edits the catalog.
 cp -R "$SKILL" "$WORK/skill"
 "$WORK/skill/tip.sh" number >/dev/null 2>&1
