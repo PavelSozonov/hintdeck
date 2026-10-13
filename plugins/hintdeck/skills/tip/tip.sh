@@ -5,6 +5,13 @@
 set -u
 DIR="$(cd "$(dirname "$0")" && pwd)"
 DECK="${HINTDECK_DECK:-claude-code}"
+# safe_name <name> — true for a name that may become one path component: lowercase letters, digits
+# and hyphens, not starting with a hyphen. No "/", no ".", so never "..", an absolute path or an option.
+safe_name() { case "${1:-}" in ''|-*|*[![:lower:][:digit:]-]*) return 1 ;; esac; }
+if ! safe_name "$DECK"; then
+  echo "ERROR: invalid deck name '$DECK' — HINTDECK_DECK takes lowercase letters, digits and hyphens."
+  exit 0
+fi
 DECK_DIR="$DIR/decks/$DECK"
 # State lives outside the skill directory: it survives plugin updates and stays out of git.
 ROOT="${HINTDECK_STATE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hintdeck}"
@@ -30,7 +37,9 @@ version_gt() {
 # ---------- language ----------
 
 available_langs() { for d in "$DECK_DIR"/*/; do [ -d "$d" ] && basename "$d"; done | tr '\n' ' ' | sed 's/ $//'; }
-has_lang() { [ -n "${1:-}" ] && [ -d "$DECK_DIR/$1" ]; }
+# A language code comes from the user, the environment or a project's settings: it must be a plain
+# name before it is used as a catalog directory.
+has_lang() { safe_name "${1:-}" && [ -d "$DECK_DIR/$1" ]; }
 
 # normalize_lang <free-form name> — maps "ru", "Russian", "русский", "ru_RU" to a catalog code
 normalize_lang() {
@@ -195,7 +204,8 @@ cmd_list() {
   left="$(candidates | wc -l | tr -d ' ')"
   cli="$(cli_version)"; ref="$(refreshed_version)"
   ticket="t$(date +%s)$$${RANDOM}"
-  : > "$TICKETS/$ticket"
+  # noclobber: never write through a file or a symlink that is already there
+  if ! ( set -C; : > "$TICKETS/$ticket" ) 2>/dev/null; then echo "ERROR: could not issue a ticket in $TICKETS"; return 0; fi
   echo "cli: ${cli:-unknown} | catalog verified against: $ref | deck: $DECK | tips: $total | shown: $shown | available now: $left"
   echo "lang: $LANG_CODE (source: $LANG_SOURCE) | available: $(available_langs)"
   if [ "$LANG_SOURCE" = "default" ] && [ ! -f "$ROOT/lang-offered" ]; then
@@ -237,6 +247,26 @@ print_tip() { # $1 = catalog row
     on { print }' "$file"
 }
 
+# valid_ticket / ticket_file <ticket> — the ticket is an untrusted argument. It must have exactly the
+# form cmd_list issues ("t" and digits, which rules out "/", "..", options and the empty string), and
+# ticket_file prints its path only for a regular file, not a symlink, whose canonical directory is
+# the canonical tickets directory.
+valid_ticket() {
+  case "${1:-}" in t[0-9]*) ;; *) return 1 ;; esac
+  case "${1#t}" in *[!0-9]*) return 1 ;; esac
+  [ "${#1}" -le 40 ]
+}
+ticket_file() {
+  local dir file parent
+  valid_ticket "${1:-}" || return 1
+  dir="$(cd -P "$TICKETS" 2>/dev/null && pwd -P)" || return 1
+  file="$dir/$1"
+  [ -f "$file" ] && [ ! -L "$file" ] || return 1
+  parent="$(cd -P "$(dirname "$file")" 2>/dev/null && pwd -P)" || return 1
+  [ "$parent" = "$dir" ] || return 1
+  printf '%s\n' "$file"
+}
+
 lock() {
   local n=0
   until mkdir "$ROOT/lock" 2>/dev/null; do n=$((n + 1)); [ "$n" -gt 50 ] && break; sleep 0.1; done
@@ -245,9 +275,13 @@ unlock() { rmdir "$ROOT/lock" 2>/dev/null; }
 
 # issue <id|number> <ticket> <mode> — mode=new: unseen tips only; mode=any: any tip, by number
 issue() {
-  local key="${1:-}" ticket="${2:-}" mode="$3" row id when
+  local key="${1:-}" ticket="${2:-}" mode="$3" row id when tfile
   if [ -z "$key" ] || [ -z "$ticket" ]; then echo "REFUSED: usage — take|show <id|number> <ticket>"; return 0; fi
-  if [ ! -f "$TICKETS/$ticket" ]; then
+  if ! valid_ticket "$ticket"; then
+    echo "REFUSED: '$ticket' is not a ticket — pass the ticket that tip.sh list printed (t followed by digits)."
+    return 0
+  fi
+  if ! tfile="$(ticket_file "$ticket")"; then
     echo "REFUSED: the ticket is not valid — a tip has already been issued for this invocation. One invocation = one tip; there is no second tip."
     return 0
   fi
@@ -259,7 +293,7 @@ issue() {
     echo "REFUSED: tip '$id' was already shown ($when). Pick another one from the unseen list."
     return 0
   fi
-  rm -f "$TICKETS/$ticket"
+  rm -f -- "$tfile"
   if [ -z "$when" ]; then printf '%s\t%s\n' "$id" "$(date +%Y-%m-%d)" >> "$SHOWN"; else echo "repeat: first shown on $when"; fi
   print_tip "$row"
 }
